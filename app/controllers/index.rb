@@ -3,24 +3,21 @@ get '/' do
 end
 
 post '/create' do
-  name = params[:name]
-  email = params[:email]
-  password = params[:password]
-  @user = User.create(name: name, email: email, password: BCrypt::Password.create(password))
+  @user = User.create_user(params[:name], params[:email], params[:password])
   @name = @user.name
   session[:user_id] = @user.id
   erb :secret
 end
 
 post '/login' do 
+  if User.authenticate?(params[:password], params[:email])
     @user = User.find_by_email(params[:email])
-    if BCrypt::Password.new(@user.password) == params[:password]
-      session[:user_id] = @user.id
-      @name = @user.name
-      erb :secret
-    else
-      redirect '/'
-    end
+    session[:user_id] = @user.id
+    @name = @user.name
+    erb :secret
+  else
+    redirect '/'
+  end
 end
 
 get '/secret' do
@@ -47,3 +44,15 @@ end
   #   session[:user_id] = authentication.id
   #   erb :secret
   # end
+
+
+# post '/login' do 
+#     @user = User.find_by_email(params[:email])
+#     if BCrypt::Password.new(@user.password) == params[:password]
+#       session[:user_id] = @user.id
+#       @name = @user.name
+#       erb :secret
+#     else
+#       redirect '/'
+#     end
+# end
